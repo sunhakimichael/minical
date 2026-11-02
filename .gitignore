@@ -1,0 +1,14 @@
+# File backup hasil export (berisi data keuangan pribadi)
+minical-backup-*.csv
+minical-backup-*.json
+
+# Tools & editor
+.omc/
+.claude/
+.vscode/
+.idea/
+
+# Sistem operasi
+.DS_Store
+Thumbs.db
+desktop.ini
