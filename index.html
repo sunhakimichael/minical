@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MiniCal – Keuangan Rumah Tangga</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="lg:flex min-h-screen">
+
+  <!-- Sidebar desktop -->
+  <aside class="hidden lg:flex flex-col w-60 shrink-0 p-5 sticky top-0 h-screen">
+    <div class="glass flex-1 p-4 flex flex-col">
+      <div class="px-2 pb-5"><div class="text-2xl font-extrabold"><span class="mint">Mini</span>Cal</div><div class="text-xs text-slate-400 mt-1">Keuangan rumah tangga</div></div>
+      <nav id="navSide" class="space-y-1.5"></nav>
+      <div class="mt-auto space-y-2 pt-4">
+        <button class="btn btn-ghost w-full" onclick="exportCSV()">⬇ Export Data (CSV)</button>
+        <button class="btn btn-ghost w-full" onclick="exportJSON()">Backup lengkap (JSON)</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 min-w-0 p-4 pb-28 lg:p-6 lg:pb-10">
+    <header class="flex items-center justify-between gap-3 mb-5">
+      <div class="lg:hidden text-xl font-extrabold"><span class="mint">Mini</span>Cal</div>
+      <h1 id="ttl" class="hidden lg:block text-xl font-bold"></h1>
+      <label class="flex items-center gap-2 text-sm text-slate-400">Bulan
+        <input id="mon" type="month" class="inp !w-auto !py-2" aria-label="Pilih bulan">
+      </label>
+    </header>
+
+    <!-- DASHBOARD -->
+    <section id="v-dash" class="view space-y-4">
+      <div id="reminder"></div>
+      <div class="glass p-6">
+        <div class="text-sm text-slate-400">Sisa Uang bulan ini</div>
+        <div id="sisa" class="text-4xl sm:text-5xl font-extrabold tracking-tight mt-1"></div>
+        <div id="formula" class="text-xs text-slate-400 mt-2"></div>
+        <div id="stats" class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-5"></div>
+      </div>
+      <div id="topBadge"></div>
+      <div class="grid md:grid-cols-5 gap-4">
+        <div class="glass p-5 md:col-span-3">
+          <h2 class="font-bold mb-3">Distribusi Spending</h2>
+          <div class="relative h-72"><canvas id="chart"></canvas></div>
+          <p id="chartEmpty" class="text-sm text-slate-400 text-center hidden">Belum ada data spending di bulan ini.</p>
+        </div>
+        <div class="glass p-5 md:col-span-2">
+          <h2 class="font-bold mb-3">Total Tabungan</h2>
+          <div id="tab" class="text-3xl font-extrabold mint"></div>
+          <div id="tabSub" class="text-xs text-slate-400 mb-4"></div>
+          <div id="tabList" class="space-y-2 text-sm"></div>
+        </div>
+      </div>
+      <div class="glass p-5"><h2 class="font-bold mb-3">Transaksi terakhir</h2><div id="recent" class="divide-y divide-white/5"></div></div>
+    </section>
+
+    <!-- TRANSAKSI -->
+    <section id="v-tx" class="view space-y-4">
+      <div class="glass p-5">
+        <h2 class="font-bold mb-3">Catat transaksi</h2>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <label class="text-xs text-slate-400">Tanggal<input id="fDate" type="date" class="inp mt-1"></label>
+          <label class="text-xs text-slate-400">Jumlah (Rp)<input id="fAmt" type="number" min="0" inputmode="numeric" placeholder="0" class="inp mt-1"></label>
+          <label class="text-xs text-slate-400">Tipe<select id="fType" class="inp mt-1"></select></label>
+          <label class="text-xs text-slate-400">Kategori<select id="fCat" class="inp mt-1"></select></label>
+          <label class="text-xs text-slate-400 sm:col-span-2">Nama transaksi<input id="fName" type="text" placeholder="mis. Nasi uduk" class="inp mt-1"></label>
+        </div>
+        <div class="flex gap-2 mt-4"><button class="btn btn-mint flex-1 sm:flex-none" onclick="addTx()">Simpan transaksi</button><button class="btn btn-ghost" onclick="resetForm()">Reset</button></div>
+        <p id="fMsg" class="text-xs mt-2 min-h-[1rem]"></p>
+      </div>
+      <div class="glass p-5">
+        <div class="flex items-center justify-between mb-3 gap-2"><h2 class="font-bold">Riwayat bulan ini</h2>
+          <button class="btn btn-ghost !py-1.5" onclick="exportCSV()">⬇ Export CSV</button></div>
+        <div id="txList" class="divide-y divide-white/5"></div>
+      </div>
+    </section>
+
+    <!-- UTANG & TAGIHAN -->
+    <section id="v-debt" class="view space-y-4">
+      <div class="glass p-5">
+        <h2 class="font-bold mb-1">Utang & Cicilan</h2>
+        <p class="text-xs text-slate-400 mb-4">Setiap transaksi "Bayar Cicilan" otomatis mengurangi sisa utang.</p>
+        <div class="overflow-x-auto"><table class="w-full text-sm min-w-[560px]">
+          <thead class="text-left text-slate-400 text-xs"><tr><th class="pb-2">Nama</th><th class="text-right">Nilai Total</th><th class="text-right">Paid</th><th class="text-right">Unpaid</th><th class="text-center">Status</th><th></th></tr></thead>
+          <tbody id="debtBody" class="divide-y divide-white/5"></tbody></table></div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
+          <input id="dName" class="inp col-span-2" placeholder="Nama utang/cicilan">
+          <input id="dTotal" type="number" min="0" class="inp" placeholder="Nilai total">
+          <input id="dPaid" type="number" min="0" class="inp" placeholder="Sudah dibayar">
+        </div>
+        <button class="btn btn-mint mt-3" onclick="addDebt()">+ Tambah utang</button>
+      </div>
+      <div class="glass p-5">
+        <h2 class="font-bold mb-1">Tagihan Tetap (Bills)</h2>
+        <p class="text-xs text-slate-400 mb-4">Status dihitung dari transaksi tipe Bills pada bulan terpilih.</p>
+        <div id="billList" class="divide-y divide-white/5"></div>
+        <div class="grid grid-cols-3 gap-2 mt-4">
+          <input id="bName" class="inp col-span-2" placeholder="Nama tagihan">
+          <input id="bAmt" type="number" min="0" class="inp" placeholder="Nominal">
+        </div>
+        <button class="btn btn-mint mt-3" onclick="addBill()">+ Tambah tagihan</button>
+      </div>
+    </section>
+
+    <!-- BELANJA -->
+    <section id="v-shop" class="view space-y-4">
+      <div class="glass p-5">
+        <h2 class="font-bold mb-1">Perencana Belanja Swalayan</h2>
+        <p class="text-xs text-slate-400 mb-4">Catat barang dan estimasi harga, centang saat sudah masuk keranjang.</p>
+        <div class="grid grid-cols-3 gap-2">
+          <input id="sName" class="inp col-span-2" placeholder="Nama barang" onkeydown="if(event.key==='Enter')addShop()">
+          <input id="sEst" type="number" min="0" class="inp" placeholder="Estimasi Rp" onkeydown="if(event.key==='Enter')addShop()">
+        </div>
+        <button class="btn btn-mint mt-3" onclick="addShop()">+ Tambah barang</button>
+      </div>
+      <div class="glass p-5">
+        <div id="shopList" class="divide-y divide-white/5"></div>
+        <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+          <div class="rounded-xl bg-white/5 p-3"><div class="text-xs text-slate-400">Total anggaran</div><div id="shTotal" class="font-bold amb mt-1"></div></div>
+          <div class="rounded-xl bg-white/5 p-3"><div class="text-xs text-slate-400">Sudah di keranjang</div><div id="shDone" class="font-bold mint mt-1"></div></div>
+          <div class="rounded-xl bg-white/5 p-3"><div class="text-xs text-slate-400">Belum dibeli</div><div id="shLeft" class="font-bold rose mt-1"></div></div>
+        </div>
+        <button class="btn btn-ghost mt-3" onclick="clearShop()">Hapus yang sudah dicentang</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Ringkasan belanja (laptop) -->
+  <aside class="hidden xl:block w-80 shrink-0 p-5 pl-0 sticky top-0 h-screen">
+    <div class="glass p-5 h-full overflow-y-auto">
+      <h2 class="font-bold mb-3">🛒 Ringkasan Belanja</h2>
+      <div id="sideShop"></div>
+      <button class="btn btn-ghost w-full mt-4" onclick="go('shop')">Buka perencana</button>
+    </div>
+  </aside>
+</div>
+
+<!-- Bottom nav mobile -->
+<nav id="navBot" class="lg:hidden fixed bottom-0 inset-x-0 z-20 grid grid-cols-4 gap-1 p-2 border-t border-white/10" style="background:rgba(15,23,42,.88);backdrop-filter:blur(16px);padding-bottom:calc(.5rem + env(safe-area-inset-bottom,0px))"></nav>
+
+<script src="script.js"></script>
+</body>
+</html>
