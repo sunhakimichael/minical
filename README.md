@@ -10,6 +10,7 @@ Aplikasi web ringan untuk mencatat keuangan rumah tangga: pemasukan, tabungan, t
 - **Utang & Tagihan**: setiap transaksi Bayar Cicilan otomatis mengurangi sisa utang. Status tagihan dihitung dari transaksi Bills di bulan terpilih.
 - **Perencana Belanja**: daftar barang dengan estimasi harga dan centang keranjang.
 - **Backup**: export CSV (transaksi + rekap utang) dan JSON (seluruh data).
+- **Editor Dashboard**: klik ⚙ **Edit Dashboard** di pojok kanan atas untuk mengganti judul, menggeser urutan (▲▼), mengatur lebar (⇔), menghapus (✕), atau memunculkan lagi widget lewat **+ Tambah Widget Baru**. Ada 6 widget: Pengingat Pembayaran, Sisa Uang & Tabungan, Distribusi Spending, Tracker Utang, Perencana Belanja, dan Transaksi Terakhir. Fitur ini hanya mengatur tampilan dan tidak mengubah data atau perhitungan.
 
 Rumus utama:
 
@@ -31,7 +32,7 @@ lalu buka http://localhost:8000.
 
 ## Penyimpanan data
 
-Data disimpan di `localStorage` browser dengan kunci `minical.v1`. Artinya:
+Data keuangan disimpan di `localStorage` browser dengan kunci `minical.v1`. Susunan dashboard disimpan terpisah di `minical_layout`, jadi menghapus atau mengatur ulang widget tidak menyentuh data keuangan. Artinya:
 
 - Data hanya ada di browser dan perangkat yang dipakai, tidak tersinkron ke tempat lain.
 - Membuka lewat `file://` dan lewat `http://localhost` dihitung sebagai dua tempat penyimpanan yang berbeda.

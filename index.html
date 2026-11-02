@@ -29,35 +29,19 @@
     <header class="flex items-center justify-between gap-3 mb-5">
       <div class="lg:hidden text-xl font-extrabold"><span class="mint">Mini</span>Cal</div>
       <h1 id="ttl" class="hidden lg:block text-xl font-bold"></h1>
-      <label class="flex items-center gap-2 text-sm text-slate-400">Bulan
-        <input id="mon" type="month" class="inp !w-auto !py-2" aria-label="Pilih bulan">
-      </label>
+      <div class="flex items-center gap-2 min-w-0">
+        <label class="flex items-center gap-2 text-sm text-slate-400 min-w-0"><span class="hidden sm:inline">Bulan</span>
+          <input id="mon" type="month" class="inp !w-auto !py-2 min-w-0" aria-label="Pilih bulan">
+        </label>
+        <button id="editBtn" class="btn btn-ghost !py-2 !px-3 whitespace-nowrap shrink-0" onclick="toggleEdit()" aria-pressed="false" aria-label="Edit Dashboard"></button>
+      </div>
     </header>
 
-    <!-- DASHBOARD -->
+    <!-- DASHBOARD (widget disusun oleh renderDashboard di script.js) -->
     <section id="v-dash" class="view space-y-4">
-      <div id="reminder"></div>
-      <div class="glass p-6">
-        <div class="text-sm text-slate-400">Sisa Uang bulan ini</div>
-        <div id="sisa" class="text-4xl sm:text-5xl font-extrabold tracking-tight mt-1"></div>
-        <div id="formula" class="text-xs text-slate-400 mt-2"></div>
-        <div id="stats" class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-5"></div>
-      </div>
-      <div id="topBadge"></div>
-      <div class="grid md:grid-cols-5 gap-4">
-        <div class="glass p-5 md:col-span-3">
-          <h2 class="font-bold mb-3">Distribusi Spending</h2>
-          <div class="relative h-72"><canvas id="chart"></canvas></div>
-          <p id="chartEmpty" class="text-sm text-slate-400 text-center hidden">Belum ada data spending di bulan ini.</p>
-        </div>
-        <div class="glass p-5 md:col-span-2">
-          <h2 class="font-bold mb-3">Total Tabungan</h2>
-          <div id="tab" class="text-3xl font-extrabold mint"></div>
-          <div id="tabSub" class="text-xs text-slate-400 mb-4"></div>
-          <div id="tabList" class="space-y-2 text-sm"></div>
-        </div>
-      </div>
-      <div class="glass p-5"><h2 class="font-bold mb-3">Transaksi terakhir</h2><div id="recent" class="divide-y divide-white/5"></div></div>
+      <p id="editHint" class="hidden glass px-4 py-3 text-sm text-slate-300">✎ <b class="mint">Mode Edit</b> — ubah judul, geser ▲▼, atur lebar ⇔, atau hapus ✕ widget. Perubahan langsung tersimpan.</p>
+      <div id="dash" class="dash"></div>
+      <div id="dashTools"></div>
     </section>
 
     <!-- TRANSAKSI -->
